@@ -1,0 +1,13 @@
+{
+  "name": "pi-context-workspace",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspace @pi-context/pi-memory-core && npm run build --workspace pi-context",
+    "typecheck": "npm run typecheck --workspace @pi-context/pi-memory-core && npm run typecheck --workspace pi-context",
+    "test": "npm run test --workspace @pi-context/pi-memory-core && npm run test --workspace pi-context",
+    "lint": "npm run lint --workspace @pi-context/pi-memory-core && npm run lint --workspace pi-context"
+  }
+}

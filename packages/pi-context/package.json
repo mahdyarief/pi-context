@@ -1,0 +1,36 @@
+{
+  "name": "pi-context",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Pi adapter and installable package scaffold for pi-context.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "skills",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "node --test tests/*.test.js",
+    "lint": "node -e \"console.log('lint placeholder: pi-context')\""
+  },
+  "dependencies": {
+    "@pi-context/pi-memory-core": "0.1.0"
+  },
+  "peerDependencies": {
+    "@mariozechner/pi-coding-agent": "*"
+  },
+  "pi": {
+    "extensions": [
+      "./src/index.ts"
+    ],
+    "skills": [
+      "./skills/memory-init/SKILL.md",
+      "./skills/memory-import/SKILL.md",
+      "./skills/memory-write/SKILL.md"
+    ]
+  }
+}
