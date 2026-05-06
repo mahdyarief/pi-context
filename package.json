@@ -4,6 +4,9 @@
   "workspaces": [
     "packages/*"
   ],
+  "devDependencies": {
+    "tsx": "^4.21.0"
+  },
   "scripts": {
     "build": "npm run build --workspace @pi-context/pi-memory-core && npm run build --workspace pi-context",
     "typecheck": "npm run typecheck --workspace @pi-context/pi-memory-core && npm run typecheck --workspace pi-context",

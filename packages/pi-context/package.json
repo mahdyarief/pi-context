@@ -14,7 +14,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "node --test tests/*.test.js",
+    "test": "node --import tsx --test tests/*.test.js",
     "lint": "node -e \"console.log('lint placeholder: pi-context')\""
   },
   "dependencies": {
@@ -22,6 +22,9 @@
   },
   "peerDependencies": {
     "@mariozechner/pi-coding-agent": "*"
+  },
+  "devDependencies": {
+    "tsx": "^4.21.0"
   },
   "pi": {
     "extensions": [

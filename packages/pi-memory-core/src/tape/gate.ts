@@ -1,0 +1,136 @@
+import path from 'node:path';
+import type { MemoryMdSettings, ProjectMeta } from '../types.js';
+import { formatTimeSuffix, getProjectMeta, isPathInside } from '../utils.js';
+import type { TapeConfig, TapeKeywordConfig } from './types.js';
+
+export type TapeGateReason = 'disabled' | 'excluded-dir' | 'missing-git' | 'enabled';
+
+export interface TapeGateResult {
+  enabled: boolean;
+  reason: TapeGateReason;
+  project: ProjectMeta | null;
+  matchedExcludeDir?: string;
+}
+
+export type KeywordHandoffInstruction = {
+  primary: string;
+  matched: string[];
+  anchorName: string;
+  message: string;
+};
+
+export type PendingHandoffMatch =
+  | { trigger: 'keyword'; instruction: KeywordHandoffInstruction }
+  | { trigger: 'manual' }
+  | null;
+
+export function shouldBlockTapeHandoffCall(
+  settings: MemoryMdSettings,
+  state: { pendingHandoffMatch: PendingHandoffMatch },
+  name: unknown,
+): string | null {
+  const handoffMode = settings.tape?.anchor?.mode ?? 'auto';
+  if (handoffMode !== 'manual') return null;
+
+  const handoffMatch = state.pendingHandoffMatch;
+  if (handoffMatch?.trigger === 'manual') return null;
+
+  if (handoffMatch?.trigger === 'keyword' && handoffMatch.instruction.anchorName === name) return null;
+
+  if (handoffMatch?.trigger === 'keyword') {
+    state.pendingHandoffMatch = null;
+  }
+
+  return 'tape_handoff is disabled when tape.anchor.mode="manual" unless a keyword or manual handoff match is present.';
+}
+
+export function resolveTapeGate(cwd: string, tape?: TapeConfig): TapeGateResult {
+  const absoluteCwd = path.resolve(cwd);
+
+  if (!tape?.enabled) {
+    return { enabled: false, reason: 'disabled', project: null };
+  }
+
+  for (const excludedDir of tape.excludeDirs ?? []) {
+    if (isPathInside(excludedDir, absoluteCwd)) {
+      return {
+        enabled: false,
+        reason: 'excluded-dir',
+        project: null,
+        matchedExcludeDir: path.resolve(excludedDir),
+      };
+    }
+  }
+
+  const project = getProjectMeta(absoluteCwd);
+  if (tape.onlyGit !== false && !project.gitRoot) {
+    return { enabled: false, reason: 'missing-git', project: null };
+  }
+
+  return { enabled: true, reason: 'enabled', project };
+}
+
+const MIN_KEYWORD_PROMPT_LENGTH = 10;
+const MAX_KEYWORD_PROMPT_LENGTH = 300;
+
+export function detectKeywordHandoff(prompt: string, config?: TapeKeywordConfig): KeywordHandoffInstruction | null {
+  const normalizedPrompt = prompt.trim();
+  if (normalizedPrompt.length < MIN_KEYWORD_PROMPT_LENGTH || normalizedPrompt.length > MAX_KEYWORD_PROMPT_LENGTH) {
+    return null;
+  }
+
+  const keywords = [...normalizeKeywordList(config?.global), ...normalizeKeywordList(config?.project)];
+  const matched = [...new Set(keywords.filter((keyword) => matchesKeyword(normalizedPrompt, keyword)))].sort(
+    (left, right) => right.length - left.length || left.localeCompare(right),
+  );
+
+  if (matched.length === 0) return null;
+
+  const primary = matched[0];
+  const anchorName = `handoff/keyword-${slugifyKeyword(primary)}-${formatTimeSuffix()}`;
+  const message = [
+    `Keyword detected: ${primary}.`,
+    '',
+    'Before continuing, call tape_handoff with:',
+    `- name: "${anchorName}"`,
+    '- summary: "<brief intent summary of the user\'s current prompt in the user\'s language>"',
+    '- purpose: "<1-2 word label for the anchor\'s purpose>"',
+    '',
+    'Constraints:',
+    '- Make the summary specific to the actual task.',
+    '- Do not use a generic keyword-only summary.',
+    '- Keep the summary under 18 words.',
+    '',
+    "Then continue the user's task normally.",
+  ].join('\n');
+
+  return { primary, matched, anchorName, message };
+}
+
+export function buildKeywordHandoffMessage(prompt: string, config?: TapeKeywordConfig): string | null {
+  return detectKeywordHandoff(prompt, config)?.message ?? null;
+}
+
+function normalizeKeywordList(keywords?: string[]): string[] {
+  if (!Array.isArray(keywords)) return [];
+  return [...new Set(keywords.map((keyword) => keyword.trim().toLowerCase()).filter(Boolean))];
+}
+
+function escapeRegex(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function matchesKeyword(prompt: string, keyword: string): boolean {
+  const pattern = `(^|[^\\p{L}\\p{N}_])${escapeRegex(keyword)}(?=$|[^\\p{L}\\p{N}_])`;
+  return new RegExp(pattern, 'iu').test(prompt);
+}
+
+function slugifyKeyword(value: string): string {
+  const slug = value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 48);
+
+  return slug || 'detected';
+}

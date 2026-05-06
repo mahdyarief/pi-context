@@ -13,11 +13,12 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "node --test tests/*.test.js",
+    "test": "node --import tsx --test tests/*.test.js",
     "lint": "node -e \"console.log('lint placeholder: pi-memory-core')\""
   },
   "devDependencies": {
     "@types/node": "^22.15.21",
+    "tsx": "^4.21.0",
     "typescript": "^5.8.3"
   }
 }
