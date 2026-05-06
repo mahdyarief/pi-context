@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Pi adapter and installable package scaffold for pi-context.",
+  "description": "Pi adapter package for git-backed memory and tape context in Pi.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [

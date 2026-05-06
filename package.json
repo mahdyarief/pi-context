@@ -1,6 +1,10 @@
 {
-  "name": "pi-context-workspace",
+  "name": "pi-context",
   "private": true,
+  "description": "Pi package and workspace for git-backed memory and tape context in Pi.",
+  "keywords": [
+    "pi-package"
+  ],
   "workspaces": [
     "packages/*"
   ],
@@ -12,5 +16,15 @@
     "typecheck": "npm run typecheck --workspace @pi-context/pi-memory-core && npm run typecheck --workspace pi-context",
     "test": "npm run test --workspace @pi-context/pi-memory-core && npm run test --workspace pi-context",
     "lint": "npm run lint --workspace @pi-context/pi-memory-core && npm run lint --workspace pi-context"
+  },
+  "pi": {
+    "extensions": [
+      "./packages/pi-context/src/index.ts"
+    ],
+    "skills": [
+      "./packages/pi-context/skills/memory-init/SKILL.md",
+      "./packages/pi-context/skills/memory-import/SKILL.md",
+      "./packages/pi-context/skills/memory-write/SKILL.md"
+    ]
   }
 }

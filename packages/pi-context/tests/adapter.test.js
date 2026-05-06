@@ -251,7 +251,7 @@ test('before_agent_start returns appended memory context when available', async 
 
   if (result?.message) {
     assert.equal(result.message.display, false);
-    assert.match(result.message.customType, /pi-context-memory/);
+    assert.match(result.message.customType, /pi-context-(memory|tape)/);
   } else if (result?.systemPrompt) {
     assert.match(result.systemPrompt, /base prompt/);
   } else {

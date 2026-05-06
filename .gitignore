@@ -3,6 +3,9 @@ dist/
 coverage/
 *.tsbuildinfo
 .DS_Store
+.pi/
+tmp/
+nul
 magic-context/
 pi-memory/
 pi-memory-md/
