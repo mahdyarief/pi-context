@@ -5,6 +5,7 @@ import type {
   ExtensionContext,
 } from '@mariozechner/pi-coding-agent';
 import fs from 'node:fs';
+import path from 'node:path';
 import {
   buildMemoryContextAsync,
   countMemoryContextFiles,
@@ -27,7 +28,7 @@ import {
 import { registerAllMemoryTools } from '../tools/index.js';
 import { buildTapeContextAsync } from '../tape/context.js';
 import { recordSessionStartAnchor, registerAllTapeTools } from '../tape/index.js';
-import { buildMemoryCheckNotifications } from '../commands/memory-check.js';
+import { buildMemoryCheckNotifications, MISSING_REPO_URL_MESSAGE } from '../commands/memory-check.js';
 import { buildMemoryReviewSummary, DEFAULT_MEMORY_REVIEW_LIMIT, normalizeMemoryReviewLimit } from '../commands/memory-review.js';
 
 export type PiLike = Pick<ExtensionAPI, 'on' | 'registerCommand' | 'registerTool' | 'sendMessage' | 'exec'>;
@@ -131,6 +132,12 @@ async function handleBeforeAgentStart(
   event: BeforeAgentStartEvent,
   ctx: ExtensionContext,
 ): Promise<BeforeAgentStartEventResult | undefined> {
+  const memoryDir = settings.localPath ? getMemoryDir(settings, ctx.cwd) : path.join(ctx.cwd, '.pi-context-memory');
+  if (!settings.repoUrl?.trim() && !fs.existsSync(getMemoryCoreDir(memoryDir))) {
+    ctx.ui.notify(MISSING_REPO_URL_MESSAGE, 'warning');
+    return undefined;
+  }
+
   if (state.sessionStartHookPromise) {
     await state.sessionStartHookPromise;
     state.sessionStartHookPromise = null;

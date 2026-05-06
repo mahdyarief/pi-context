@@ -191,6 +191,25 @@ test('memory-review clamps limit and excludes session-prefixed anchors', async (
   assert.doesNotMatch(notices.at(-1).message, /session\/new/);
 });
 
+test('memory-check reports missing repoUrl with setup hint', async () => {
+  const { registerAdapterShell } = await import('../src/bootstrap/index.ts');
+  const tempDir = createTempDir('pi-context-memory-check-no-repo');
+  const projectDir = path.join(tempDir, 'project');
+  const notices = [];
+  initGitRepo(projectDir);
+
+  const pi = createMockPi();
+  registerAdapterShell(pi, { enabled: true, localPath: path.join(tempDir, 'memory-root'), repoUrl: '' });
+
+  const command = pi.commands.get('memory-check');
+  await command.handler('', createCtx({ cwd: projectDir, ui: { notify(message, level) { notices.push({ message, level }); } } }));
+
+  assert.match(notices[0].message, /Repo URL: Missing/);
+  assert.match(notices[0].message, /Add pi-context\.repoUrl/);
+  assert.match(notices[0].message, /run \/memory-init/i);
+  assert.equal(notices[0].level, 'warning');
+});
+
 test('memory-check reports uninitialized memory with setup hint', async () => {
   const { registerAdapterShell } = await import('../src/bootstrap/index.ts');
   const tempDir = createTempDir('pi-context-memory-check-uninit');
@@ -199,7 +218,7 @@ test('memory-check reports uninitialized memory with setup hint', async () => {
   initGitRepo(projectDir);
 
   const pi = createMockPi();
-  registerAdapterShell(pi, { enabled: true, localPath: path.join(tempDir, 'memory-root') });
+  registerAdapterShell(pi, { enabled: true, localPath: path.join(tempDir, 'memory-root'), repoUrl: 'https://github.com/example/memory.git' });
 
   const command = pi.commands.get('memory-check');
   await command.handler('', createCtx({ cwd: projectDir, ui: { notify(message, level) { notices.push({ message, level }); } } }));
@@ -239,6 +258,28 @@ test('memory-check reports repo status and tree output for initialized memory', 
   assert.match(notices[1].message, /core\/user\/identity.md/);
   assert.match(notices[1].message, /core\/project\/roadmap.md/);
   assert.equal(notices[1].level, 'info');
+});
+
+test('before_agent_start notifies when repoUrl is missing', async () => {
+  const { registerAdapterShell } = await import('../src/bootstrap/index.ts');
+  const tempDir = createTempDir('pi-context-before-start-no-repo');
+  const projectDir = path.join(tempDir, 'project');
+  const notices = [];
+  initGitRepo(projectDir);
+
+  const pi = createMockPi();
+  registerAdapterShell(pi, { enabled: true, localPath: path.join(tempDir, 'memory-root'), repoUrl: '' });
+
+  const handler = pi.handlers.get('before_agent_start');
+  const result = await handler?.({ prompt: 'hello', systemPrompt: 'base prompt' }, createCtx({ cwd: projectDir, ui: { notify(message, level) { notices.push({ message, level }); } } }));
+
+  assert.equal(result, undefined);
+  assert.deepEqual(notices, [
+    {
+      message: 'pi-context is installed but pi-context.repoUrl is missing. Add your GitHub memory repository URL in settings, then run /memory-init.',
+      level: 'warning',
+    },
+  ]);
 });
 
 test('before_agent_start returns appended memory context when available', async () => {

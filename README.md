@@ -56,7 +56,7 @@ Pi supports installing directly from this GitHub repo:
 pi install https://github.com/mahdyarief/pi-context
 ```
 
-You can also pin/update later with normal Pi package commands:
+You can also manage it later with normal Pi package commands:
 
 ```bash
 pi list
@@ -97,6 +97,24 @@ Example:
 }
 ```
 
+## Ready-to-use flow
+
+After install, `pi-context` needs a GitHub memory repository URL in `pi-context.repoUrl`.
+
+If `repoUrl` is missing, `pi-context` now warns clearly that it is installed but not ready yet, and tells the user to:
+
+1. add `pi-context.repoUrl` in settings
+2. run `/memory-init`
+
+That means the expected first-time flow is:
+
+1. install `pi-context`
+2. create or choose a GitHub repo for memory
+3. set `pi-context.repoUrl`
+4. run `/memory-init`
+5. verify with `/memory-check`
+6. start using memory normally
+
 ## First-time setup
 
 After config, initialize project memory:
@@ -111,17 +129,68 @@ Then verify:
 
 When ready, push memory changes with `memory_sync`.
 
-## Notes on migration from pi-memory-md
+## Usage examples
 
-If `pi-memory-md` is still installed, remove it first to avoid tool-name collisions.
+### Check current memory status
 
-Typical cleanup:
-
-```bash
-pi remove git:github.com/VandeeFeng/pi-memory-md
+```text
+/memory-check
 ```
 
-Then install `pi-context`.
+Typical use:
+- confirms whether memory is initialized
+- shows repo status
+- shows a small memory tree summary
+
+### Refresh memory into the current session
+
+```text
+/memory-refresh
+```
+
+Typical use:
+- after editing memory files manually
+- after pulling memory changes
+- after initializing a new project memory folder
+
+### Review recent anchors quickly
+
+```text
+/memory-review
+/memory-review 10
+```
+
+Typical use:
+- see recent non-session anchors
+- get a compact session-oriented summary
+- inspect recent handoff history without opening files directly
+
+### Ask for a manual anchor
+
+```text
+/memory-anchor summarize release decision and open risks
+```
+
+Typical use:
+- force a durable anchor for a milestone or decision
+- create a handoff point before context switches
+
+### Inspect the memory repo from tools
+
+Examples of tool intents inside Pi:
+
+- `memory_check` — inspect memory folder structure
+- `memory_list` — list files under memory
+- `memory_search` — search frontmatter or markdown content
+- `memory_sync` with `status` — inspect repo state
+- `memory_sync` with `push` — push saved memory changes
+- `memory_sync` with `pull` — pull latest memory changes
+
+## Notes on migration from pi-memory-md
+
+`pi-context` cannot be used in parallel with `git:github.com/VandeeFeng/pi-memory-md`.
+
+They register overlapping memory tools/commands, so running both at the same time causes conflicts.
 
 ## Package layout
 

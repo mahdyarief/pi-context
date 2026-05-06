@@ -1,5 +1,8 @@
 import { getMemoryMeta, gitExec, listMemoryFilesAsync, type MemoryMdSettings } from '@pi-context/pi-memory-core';
 
+export const MISSING_REPO_URL_MESSAGE =
+  'pi-context is installed but pi-context.repoUrl is missing. Add your GitHub memory repository URL in settings, then run /memory-init.';
+
 type PiExec = (command: string, args: string[], options?: { cwd?: string; signal?: AbortSignal }) => Promise<{ stdout: string }>;
 
 export async function renderMemoryTree(memoryPath: string, maxLines = 25): Promise<string> {
@@ -19,6 +22,19 @@ export async function buildMemoryCheckNotifications(
   args: string,
 ): Promise<Array<{ message: string; level: 'info' | 'warning' }>> {
   const info = await getMemoryMeta(settings, cwd);
+
+  if (!info.initialized && !settings.repoUrl?.trim()) {
+    return [
+      {
+        message: `Memory: ${info.name} | Repo URL: Missing | Add pi-context.repoUrl, then run /memory-init | Path: ${info.memoryPath}`,
+        level: 'warning',
+      },
+      {
+        message: MISSING_REPO_URL_MESSAGE,
+        level: 'warning',
+      },
+    ];
+  }
 
   if (!info.initialized) {
     return [
