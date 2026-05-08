@@ -4,7 +4,8 @@ Pi adapter and installable package for the `pi-context` workspace.
 
 ## Current status
 
-Extraction is active and the package is no longer just scaffold.
+`pi-context` is usable now for practical non-UI Pi workflows.
+Current posture: installable Pi adapter package with stable shared core, while some advanced UI parity is still intentionally incomplete.
 
 Implemented in `packages/pi-context` now:
 - Pi adapter shell / default extension export
@@ -60,7 +61,7 @@ Implemented in `packages/pi-context` now:
 
 Shared harness-agnostic logic has been extracted into `packages/pi-memory-core`.
 
-## Package split during migration
+## Package split
 
 ### `packages/pi-context`
 Owns Pi-facing runtime integration:
@@ -116,9 +117,9 @@ Owns shared non-Pi logic:
 - `skills/memory-import/SKILL.md`
 - `skills/memory-write/SKILL.md`
 
-## Reference implementation during migration
+## Reference implementation
 
-Until extraction completes, `pi-memory-md/` remains the upstream reference.
+`pi-memory-md/` remains a useful upstream reference for parity checks that are still in progress.
 
 Primary reference paths:
 - `pi-memory-md/index.ts`

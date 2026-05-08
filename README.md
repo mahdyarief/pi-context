@@ -1,8 +1,8 @@
 # pi-context
 
-`pi-context` is a Pi package for git-backed markdown memory, startup memory delivery, and file-backed tape anchors/context.
+`pi-context` is a Pi package for git-backed markdown memory, startup memory delivery, and file-backed tape anchors/context, ready for practical non-UI use today.
 
-It is the successor/migration target for `pi-memory-md`, split into:
+The workspace is split into:
 
 - `packages/pi-context` — Pi-facing extension/package surface
 - `packages/pi-memory-core` — shared harness-agnostic memory logic
@@ -34,7 +34,9 @@ After install and config, `pi-context` can:
 
 ## Current status
 
-This package is ready for practical non-UI use in Pi now:
+Current posture: **stable core, installable Pi adapter, some advanced UI parity still missing**.
+
+Ready now:
 
 - install/load works
 - memory commands/tools work
@@ -47,6 +49,17 @@ Still intentionally incomplete versus upstream `pi-memory-md`:
 - full tape-service parity
 - full advanced context-ranking parity
 - full session-tree replay/reconfigure parity
+
+Verification scripts available at workspace root:
+
+```bash
+npm run build
+npm run typecheck
+npm run test
+npm run lint
+```
+
+Note: current lint scripts are placeholder-only pass-through checks, so treat lint output honestly.
 
 ## Install
 
@@ -186,7 +199,7 @@ Examples of tool intents inside Pi:
 - `memory_sync` with `push` — push saved memory changes
 - `memory_sync` with `pull` — pull latest memory changes
 
-## Notes on migration from pi-memory-md
+## Compatibility note for pi-memory-md users
 
 `pi-context` cannot be used in parallel with `git:github.com/VandeeFeng/pi-memory-md`.
 
@@ -194,13 +207,13 @@ They register overlapping memory tools/commands, so running both at the same tim
 
 ## Package layout
 
-- `packages/pi-context/` — active Pi package implementation
-- `packages/pi-memory-core/` — shared core logic
-- `pi-memory-md/` — upstream reference during migration
+- `packages/pi-context/` — installable Pi package implementation
+- `packages/pi-memory-core/` — stable shared core logic
+- `pi-memory-md/` — upstream reference used for parity checks where still helpful
 
-## Upstream reference during migration
+## Upstream reference
 
-Behavior is still compared against these source-of-truth files:
+Behavior is still compared against these source-of-truth files where parity work is still in progress:
 
 - `pi-memory-md/index.ts`
 - `pi-memory-md/tools.ts`
