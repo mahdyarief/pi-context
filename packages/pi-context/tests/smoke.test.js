@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-test('pi-context smoke scaffold', async () => {
+test('pi-context smoke exports adapter package surface', async () => {
   const mod = await import('../src/index.ts');
   assert.equal(mod.packageInfo.name, 'pi-context');
   assert.equal(mod.packageInfo.stage, 'adapter-shell');

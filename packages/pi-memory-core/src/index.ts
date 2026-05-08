@@ -14,5 +14,5 @@ export * from "./git/sync.js";
 
 export const packageInfo = {
   name: "@pi-context/pi-memory-core",
-  stage: "scaffold",
+  stage: "stable-core",
 } as const;
